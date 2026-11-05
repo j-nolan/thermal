@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>Waveshare Thermal Camera Viewer for Android, No App Needed</title>
+<meta name="description" content="Free live heatmap for the Waveshare Smartphone IR Thermal Imaging Camera (B) and other 80x62 SenXor cameras. Runs in Chrome on Android with no app to install.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='8' fill='%23eb5a14'/%3E%3Ccircle cx='8' cy='8' r='3' fill='%23ffffeb'/%3E%3C/svg%3E">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Thermal Camera Viewer",
+  "description": "Live heatmap for USB SenXor thermal cameras in Chrome on Android.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "Android",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Person", "name": "James Nolan", "url": "https://otherwise.ch" }
+}
+</script>
+<style>
+  :root { color-scheme: dark; font-family: system-ui, sans-serif; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #000; color: #eee; }
+  #app { height: 100dvh; display: flex; flex-direction: column; }
+  #intro { position: absolute; inset: 0; padding: 16px; display: grid; place-content: center; text-align: center; }
+  #intro[hidden] { display: none; }
+  h1 { margin: 0 0 12px; font-size: 1.6rem; }
+  #intro p { margin: 0; color: #bbb; }
+  article { max-width: 42rem; margin: 0 auto; padding: 24px 16px 48px; line-height: 1.6; }
+  h2 { margin-top: 2em; font-size: 1.25rem; }
+  h3 { margin-bottom: 0; font-size: 1rem; }
+  h3 + p { margin-top: 4px; }
+  a { color: #ffbe1e; }
+  main { position: relative; flex: 1; min-height: 0; }
+  canvas { width: 100%; height: 100%; object-fit: contain; display: block; }
+  canvas.flip { transform: scaleX(-1); }
+  #cross { position: absolute; left: 50%; top: 50%; width: 28px; height: 28px; margin: -14px;
+    background: linear-gradient(#fff, #fff) center / 100% 2px no-repeat, linear-gradient(#fff, #fff) center / 2px 100% no-repeat;
+    mix-blend-mode: difference; pointer-events: none; }
+  #center { position: absolute; left: 50%; top: 12px; transform: translateX(-50%);
+    font-size: 2rem; font-weight: 600; font-variant-numeric: tabular-nums; text-shadow: 0 0 6px #000, 0 0 2px #000; }
+  #status { position: absolute; left: 16px; right: 16px; bottom: 12px; text-align: center; overflow-wrap: anywhere; text-shadow: 0 0 4px #000; }
+  #scale { display: flex; align-items: center; gap: 8px; padding: 8px 16px; font-variant-numeric: tabular-nums; }
+  #bar { flex: 1; height: 12px; border-radius: 6px; background: linear-gradient(90deg, #00000a, #320082, #aa1478, #eb5a14, #ffbe1e, #ffffeb); }
+  nav { display: flex; gap: 8px; padding: 0 16px calc(12px + env(safe-area-inset-bottom)); }
+  button { flex: 1; min-height: 48px; font: inherit; color: inherit; background: #222; border: 1px solid #555; border-radius: 8px; }
+  #connect { background: #b4500f; border-color: #b4500f; }
+</style>
+</head>
+<body>
+<section id="app">
+<main>
+  <header id="intro">
+    <h1>Thermal camera viewer for Android</h1>
+    <p>Connect your Waveshare or SenXor camera, then push Connect. Scroll down for help.</p>
+  </header>
+  <canvas id="view" width="80" height="62" role="img" aria-label="Live thermal image"></canvas>
+  <div id="cross" aria-hidden="true" hidden></div>
+  <div id="center" aria-label="Temperature at the center"></div>
+  <div id="status" role="status"></div>
+</main>
+<div id="scale"><span id="min">--</span><div id="bar" aria-hidden="true"></div><span id="max">--</span></div>
+<nav>
+  <button id="connect">Connect</button>
+  <button id="rotate">Rotate</button>
+  <button id="flip">Flip</button>
+</nav>
+</section>
+<article>
+  <h2>Use a Waveshare thermal camera on Android with no app</h2>
+  <p>This page shows a live heatmap from the Waveshare Smartphone IR Thermal Imaging Camera (B). It runs in Chrome on Android. You do not install an app and you do not make an account.</p>
+  <p>The Waveshare camera uses an 80x62 SenXor sensor from Meridian Innovation. This page is an unofficial viewer. It has no connection to Waveshare or Meridian Innovation.</p>
+
+  <h2>How to use the viewer</h2>
+  <ol>
+    <li>Close the SenXor app if it is open.</li>
+    <li>Unlock the phone and connect the camera to the USB-C port.</li>
+    <li>If Android asks which app to open, close that dialog.</li>
+    <li>Open this page in Chrome.</li>
+    <li>Push Connect, select "USB Virtual COM" in the list, and push Connect in the dialog.</li>
+  </ol>
+  <p>After the first connection, Chrome can connect the camera again when you load the page. The Rotate and Flip buttons change the image direction. The page keeps your choice on the phone.</p>
+
+  <h2>What the heatmap shows</h2>
+  <ul>
+    <li>A live image in the ironbow palette. Dark colors are cold and bright colors are hot.</li>
+    <li>The temperature at the center of the image, at the cross.</li>
+    <li>The minimum and maximum temperature in the image, in degrees Celsius.</li>
+  </ul>
+  <p>The color range changes with each frame to fit the minimum and maximum temperature. Thus, the same color can show a different temperature in a different frame. Read the numbers when you must compare two scenes.</p>
+  <p>The sensor reads infrared radiation from surfaces. Shiny metal and glass can give incorrect values.</p>
+
+  <h2>Supported cameras, phones, and browsers</h2>
+  <ul>
+    <li><strong>Tested:</strong> Waveshare Smartphone IR Thermal Imaging Camera (B), USB ID 0416:b020, on a Pixel 11 Pro with Android 17 and Chrome 156.</li>
+    <li><strong>Not tested:</strong> other cameras with an 80x62 SenXor sensor and other Android phones. They can work if they use the same USB protocol.</li>
+    <li><strong>Not supported:</strong> iPhone, Firefox, and Safari, because they do not have WebUSB. SenXor sensors with a resolution other than 80x62 also do not work.</li>
+    <li><strong>Computers:</strong> not tested.</li>
+  </ul>
+
+  <h2>Troubleshooting</h2>
+  <h3>The camera is not in the list</h3>
+  <p>Unlock the phone. Disconnect the camera, turn the plug 180 degrees, and connect it again. Then reload the page.</p>
+  <h3>Nothing happens after I push Connect</h3>
+  <p>Make sure that you selected "USB Virtual COM". Reload the page and try again. Do this only after you close the SenXor app.</p>
+  <h3>The page shows "No frames from the camera"</h3>
+  <p>The page sends the start command again every two seconds. If frames do not start, disconnect the camera and connect it again.</p>
+  <h3>The image is upside down or reversed</h3>
+  <p>Push Rotate and Flip until the image matches the scene. Together, the two buttons give all eight image directions.</p>
+
+  <h2>Questions</h2>
+  <h3>Do I need the SenXor app?</h3>
+  <p>No. This page reads the camera directly.</p>
+  <h3>Why can a webcam app not read this camera?</h3>
+  <p>The camera is not a UVC webcam. It is a USB serial device that sends temperature frames. Webcam apps do not read that format.</p>
+  <h3>Does the image go to a server?</h3>
+  <p>No. The page reads the frames in your browser. The page does not send them to a server, and it has no analytics.</p>
+  <h3>Is the viewer free?</h3>
+  <p>Yes. The viewer is open source under the Apache 2.0 license.</p>
+
+  <h2>How it works</h2>
+  <p>Chrome on Android gives web pages access to USB devices with the WebUSB API. The page opens the camera as a USB serial device at 115200 baud and sends a command to start the stream. Each frame has 4960 16-bit values in deci-Kelvin. The page changes them to degrees Celsius and draws them on a canvas. The protocol comes from <a href="https://github.com/MeridianInnovation/pysenxor-lite">pysenxor-lite</a>, the Python library from Meridian Innovation.</p>
+  <p>The source code is on <a href="https://github.com/j-nolan/thermal">GitHub</a>.</p>
+  <p>Made by <a href="https://otherwise.ch">James Nolan</a>.</p>
+</article>
+<script type="module">
+import { HEIGHT, STREAM_OFF, STREAM_ON, WIDTH, decodeFrame, findPipes, ironbow, parseMessages, rotationMap } from "./senxor.js";
+
+const $ = (id) => document.getElementById(id);
+const canvas = $("view");
+const ctx = canvas.getContext("2d");
+const lut = ironbow();
+const CENTER = (HEIGHT >> 1) * WIDTH + (WIDTH >> 1);
+const STALL_MS = 2000;
+const SENXOR_VENDOR_ID = 0x0416;
+const LINE_CODING_115200_8N1 = new Uint8Array([0x00, 0xc2, 0x01, 0x00, 0, 0, 8]);
+
+let device = null;
+let outEndpoint = 0;
+let lastFrame = 0;
+let view = load();
+let layout = null;
+let image = null;
+
+function load() {
+  // Matches the image to the scene with the camera in the phone USB port.
+  const standard = { turns: 1, flip: true };
+  try {
+    return { ...standard, ...JSON.parse(localStorage.getItem("view")) };
+  } catch {
+    return standard;
+  }
+}
+
+function applyView() {
+  try {
+    localStorage.setItem("view", JSON.stringify(view));
+  } catch {}
+  layout = rotationMap(view.turns);
+  canvas.width = layout.width;
+  canvas.height = layout.height;
+  image = ctx.createImageData(layout.width, layout.height);
+  canvas.classList.toggle("flip", view.flip);
+}
+
+function setStatus(text) {
+  $("status").textContent = text;
+}
+
+function setConnected(connected) {
+  $("connect").hidden = connected;
+  $("intro").hidden = connected;
+  $("cross").hidden = !connected;
+}
+
+const celsius = (t) => `${t.toFixed(1)} °C`;
+
+function show({ temps, min, max }) {
+  const pixels = new Uint32Array(image.data.buffer);
+  const scale = 255 / (max - min || 1);
+  for (let i = 0; i < pixels.length; i++) pixels[i] = lut[((temps[layout.map[i]] - min) * scale) | 0];
+  ctx.putImageData(image, 0, 0);
+  $("center").textContent = celsius(temps[CENTER]);
+  $("min").textContent = celsius(min);
+  $("max").textContent = celsius(max);
+}
+
+function describe(dev) {
+  const hex = (n) => n.toString(16).padStart(4, "0");
+  const classes = dev.configuration?.interfaces.map((i) => i.alternate.interfaceClass).join(",");
+  return `USB ${hex(dev.vendorId)}:${hex(dev.productId)}, classes ${classes}`;
+}
+
+function drop(dev, message) {
+  if (dev !== device) return;
+  device = null;
+  setConnected(false);
+  setStatus(message);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  $("center").textContent = "";
+  $("min").textContent = $("max").textContent = "--";
+  dev.close().catch(() => {});
+}
+
+async function readLoop(dev, endpoint) {
+  let pending = new Uint8Array(0);
+  while (dev === device) {
+    const result = await dev.transferIn(endpoint, 16384);
+    if (dev !== device) return;
+    if (result.status === "stall") {
+      await dev.clearHalt("in", endpoint);
+      continue;
+    }
+    const chunk = new Uint8Array(result.data.buffer, result.data.byteOffset, result.data.byteLength);
+    const joined = new Uint8Array(pending.length + chunk.length);
+    joined.set(pending);
+    joined.set(chunk, pending.length);
+    const { messages, rest } = parseMessages(joined);
+    pending = rest;
+    const frames = messages.filter((m) => m.cmd === "GFRA");
+    if (frames.length) {
+      show(decodeFrame(frames.at(-1).data));
+      lastFrame = Date.now();
+      setStatus("");
+    }
+    if (messages.some((m) => m.cmd === "SERR")) setStatus("The camera reports no sensor module");
+  }
+}
+
+async function connect(dev) {
+  if (device) return;
+  device = dev;
+  setStatus("Connecting");
+  try {
+    await dev.open();
+    if (!dev.configuration) await dev.selectConfiguration(1);
+    const pipes = findPipes(dev.configuration);
+    if (pipes.control !== undefined) await dev.claimInterface(pipes.control);
+    await dev.claimInterface(pipes.data);
+    if (pipes.control !== undefined) {
+      const request = { requestType: "class", recipient: "interface", index: pipes.control };
+      await dev.controlTransferOut({ ...request, request: 0x20, value: 0 }, LINE_CODING_115200_8N1);
+      // The vendor driver opens the port with DTR on, and some USB serial firmware stays silent without it.
+      await dev.controlTransferOut({ ...request, request: 0x22, value: 1 });
+    }
+    outEndpoint = pipes.out;
+    readLoop(dev, pipes.in).catch((e) => drop(dev, `Read failed: ${e.message} (${describe(dev)})`));
+    await dev.transferOut(pipes.out, STREAM_OFF);
+    await dev.transferOut(pipes.out, STREAM_ON);
+    lastFrame = Date.now();
+    setConnected(true);
+    setStatus("Waiting for frames");
+    navigator.wakeLock?.request("screen").catch(() => {});
+  } catch (e) {
+    drop(dev, `${e.name}: ${e.message} (${describe(dev)})`);
+  }
+}
+
+// The camera can miss the start command while it boots, so send it again until frames arrive.
+setInterval(() => {
+  if (!device || !outEndpoint || Date.now() - lastFrame < STALL_MS) return;
+  const dev = device;
+  setStatus(`No frames from the camera (${describe(dev)})`);
+  dev.transferOut(outEndpoint, STREAM_ON).catch((e) => drop(dev, `Write failed: ${e.message}`));
+}, STALL_MS);
+
+$("rotate").onclick = () => {
+  view.turns = (view.turns + 1) % 4;
+  applyView();
+};
+$("flip").onclick = () => {
+  view.flip = !view.flip;
+  applyView();
+};
+
+applyView();
+if (navigator.usb) {
+  $("connect").onclick = () => {
+    // A stuck attempt must not block a new one that the user asks for.
+    device = null;
+    // Only the camera: selecting another device in the list made requestDevice hang on the Pixel.
+    navigator.usb
+      .requestDevice({ filters: [{ vendorId: SENXOR_VENDOR_ID }] })
+      .then(connect, () => {});
+  };
+  navigator.usb.addEventListener("connect", (e) => connect(e.device));
+  navigator.usb.addEventListener("disconnect", (e) => drop(e.device, "Camera unplugged"));
+  navigator.usb.getDevices().then((devices) => devices[0] && connect(devices[0]));
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && device) navigator.wakeLock?.request("screen").catch(() => {});
+  });
+} else {
+  $("connect").disabled = true;
+  setStatus("WebUSB is not available. Open this page over HTTPS in Chrome.");
+}
+</script>
+</body>
+</html>
