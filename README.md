@@ -1,5 +1,7 @@
 # Thermal
 
+Open the viewer at https://thermal.otherwise.ch/.
+
 Live heatmap for the Waveshare Smartphone IR Thermal Imaging Camera (B). The page runs in Chrome on Android. It has no build step and no dependencies.
 
 The camera uses a Meridian SenXor 80x62 sensor. It is a USB serial device (0416:b020, "USB Virtual COM"), not a UVC camera. The page reads it with WebUSB, so the page must load over HTTPS or from localhost.

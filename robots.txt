@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://thermal.otherwise.ch/sitemap.xml
